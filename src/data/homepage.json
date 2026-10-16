@@ -1,8 +1,14 @@
 {
-  "title": "我的小窝",
-  "description": "欢迎你的来访！！",
+  "title": "夏鸣Ntasunaki的猫窝！",
+  "description": "虾米的鱼缸！",
   "buttons": [
-    { "label": "博客", "url": "./blog" },
-    { "label": "关于我", "url": "./docs/intro" }
+    {
+      "label": "博客",
+      "url": "./blog"
+    },
+    {
+      "label": "关于我",
+      "url": "./docs/intro"
+    }
   ]
 }
