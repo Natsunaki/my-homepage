@@ -74,8 +74,8 @@ const config = {
       giscus: {
         repo: 'Natsunaki/my-homepage',
         repoId: 'R_kgDOVLqP7Q',
-        category: '',
-        categoryId: '',
+        category: 'Announcements',
+        categoryId: 'DIC_kwDOVLqP7c4DIk7B',
       },
 
 
