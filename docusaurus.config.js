@@ -45,6 +45,20 @@ const config = {
     locales: ['zh-Hans'],
   },
 
+  plugins: [
+    // 「世界观」内容板块:读取 world_building/ 文件夹,网址在 /world/
+    // (想加内容:在 world_building/ 里新建 .md 文件,或在管理页「新建文档 → 世界观」)
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'world',
+        path: 'world_building',
+        routeBasePath: 'world',
+        sidebarPath: './sidebarsWorld.js',
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
@@ -102,6 +116,7 @@ const config = {
             ? {
               type: 'docSidebar',
               sidebarId: item.sidebarId,
+              ...(item.docsPluginId ? { docsPluginId: item.docsPluginId } : {}),
               label: item.label,
               position: item.position,
             }

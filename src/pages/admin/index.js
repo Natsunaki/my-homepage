@@ -235,7 +235,7 @@ export default function AdminPage() {
       const data = await gh(usePat, `/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`);
       const list = (data.tree || [])
         .map((t) => t.path)
-        .filter((p) => /^blog\/.+\.md$/.test(p) || /^docs\/.+\.md$/.test(p))
+        .filter((p) => /^blog\/.+\.md$/.test(p) || /^docs\/.+\.md$/.test(p) || /^world_building\/.+\.md$/.test(p))
         .sort();
       setFiles(list);
       if (usePat) {
@@ -862,6 +862,7 @@ export default function AdminPage() {
         url: it.url || '',
         position: it.position || 'left',
         sidebarId: it.sidebarId || '',
+        docsPluginId: it.docsPluginId || '',
       })),
     }));
 
@@ -893,7 +894,13 @@ export default function AdminPage() {
     const fileData = {
       items: navbar.data.items.map((it) =>
         it.type === 'docSidebar'
-          ? { type: 'docSidebar', label: it.label, sidebarId: it.sidebarId, position: it.position }
+          ? {
+            type: 'docSidebar',
+            label: it.label,
+            sidebarId: it.sidebarId,
+            ...(it.docsPluginId ? { docsPluginId: it.docsPluginId } : {}),
+            position: it.position,
+          }
           : { type: 'link', label: it.label, url: it.url, position: it.position }
       ),
     };
@@ -941,7 +948,7 @@ export default function AdminPage() {
       <div key={f} className="admin-file-row" style={indent}>
         <button className="admin-file-link" disabled={busy} onClick={() => openFile(f)}>
           {metas[f] && metas[f].pos != null && <span className="admin-badge admin-badge--pos">#{metas[f].pos}</span>}
-          {showName(f, 'docs/')}
+          {showName(f, f.startsWith('world_building/') ? 'world_building/' : 'docs/')}
         </button>
         <button
           className="button button--secondary admin-small-btn"
@@ -997,7 +1004,7 @@ export default function AdminPage() {
       if (pa !== pb) return pa - pb;
       return a.localeCompare(b);
     });
-    const dirLabel = (d) => ({ blog: '博客文章', docs: '文档页面' }[d] || d);
+    const dirLabel = (d) => ({ blog: '博客文章', docs: '文档页面', world_building: '世界观' }[d] || d);
     return (
       <>
         {dirs.map((d) => {
@@ -1285,6 +1292,7 @@ export default function AdminPage() {
                 onChange={(e) => setNewDoc({ ...newDoc, dir: e.target.value })}>
                 <option value="docs/">文档根目录</option>
                 <option value="docs/tools/">工具箱(docs/tools)</option>
+                <option value="world_building/">世界观(world_building)</option>
               </select>
             </label>
             <p className="admin-note">

@@ -13,16 +13,17 @@
       "position": "left"
     },
     {
+      "type": "docSidebar",
+      "label": "世界观",
+      "sidebarId": "worldSidebar",
+      "docsPluginId": "world",
+      "position": "left"
+    },
+    {
       "type": "link",
       "label": "GitHub",
       "url": "https://github.com/Natsunaki",
       "position": "right"
-    },
-    {
-      "type": "link",
-      "label": "世界观",
-      "url": "/world_building",
-      "position": "left"
     }
   ]
 }
