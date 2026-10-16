@@ -1,0 +1,210 @@
+/* 内容管理页面样式 */
+
+.admin-wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.admin-user {
+  font-size: 0.95rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.admin-user .button {
+  margin-left: 0.5rem;
+}
+
+.admin-status {
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-status--ok {
+  background: #e6f7ea;
+  border: 1px solid #7bd88f;
+  color: #14532d;
+}
+
+.admin-status--err {
+  background: #fdecea;
+  border: 1px solid #f1998e;
+  color: #7f1d1d;
+}
+
+.admin-status--info {
+  background: #eef2ff;
+  border: 1px solid #a5b4fc;
+  color: #312e81;
+}
+
+html[data-theme='dark'] .admin-status--ok {
+  background: #14321d;
+  border-color: #2f7a44;
+  color: #b7f0c3;
+}
+
+html[data-theme='dark'] .admin-status--err {
+  background: #3b1a17;
+  border-color: #a34437;
+  color: #ffc9c2;
+}
+
+html[data-theme='dark'] .admin-status--info {
+  background: #1e2447;
+  border-color: #4c56a3;
+  color: #cdd3ff;
+}
+
+.admin-help {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  background: var(--ifm-background-surface-color);
+}
+
+.admin-help summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.admin-help ol {
+  margin: 0.6rem 0 0.3rem;
+  padding-left: 1.4rem;
+}
+
+.admin-help li {
+  margin: 0.25rem 0;
+}
+
+.admin-note {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  overflow-wrap: anywhere;
+}
+
+.admin-login-box {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.admin-input {
+  flex: 1;
+  min-width: 260px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 6px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 0.95rem;
+}
+
+.admin-list-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.admin-list-view h2,
+.admin-new-view h2 {
+  font-size: 1.15rem;
+  margin-top: 1.5rem;
+}
+
+.admin-file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+}
+
+.admin-file-list li {
+  margin: 0.15rem 0;
+}
+
+.admin-file-link {
+  background: none;
+  border: none;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ifm-link-color);
+  font-size: 0.98rem;
+  text-align: left;
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.admin-file-link:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.admin-field {
+  display: block;
+  margin: 0.8rem 0;
+  font-size: 0.95rem;
+}
+
+.admin-field .admin-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.3rem;
+}
+
+.admin-edit-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-edit-bar code {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-edit-bar .admin-list-actions {
+  margin-bottom: 0;
+}
+
+.admin-textarea {
+  width: 100%;
+  min-height: 58vh;
+  padding: 0.9rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
