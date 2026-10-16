@@ -733,6 +733,23 @@ export default function AdminPage() {
   const linkToForm = (l) => ({ label: l.label || '', url: l.href || l.to || '' });
   const formToLink = (l) => (l.url.startsWith('http') ? { label: l.label, href: l.url } : { label: l.label, to: l.url });
 
+  // 站内地址校验:已知的板块地址(防止填了不存在的页面,导致网站构建失败)
+  const isValidInternal = (url) => {
+    const n = url.startsWith('./') ? '/' + url.slice(2) : url;
+    if (n === '/' || n.startsWith('/my-homepage')) return true;
+    return ['/blog', '/docs', '/world'].some((p) => n === p || n.startsWith(p + '/'));
+  };
+
+  const confirmLinks = (urls) => {
+    const bad = urls.filter((u) => u && !u.startsWith('http') && !u.startsWith('#') && !isValidInternal(u));
+    if (bad.length === 0) return true;
+    return window.confirm(
+      '注意!以下站内地址可能指向不存在的页面,保存后会导致网站构建失败(红色 ✗):\n\n' +
+        bad.join('\n') +
+        '\n\n已知的板块地址:/(首页)、/blog(博客)、/docs/…(文档)、/world/…(原创世界观)\n\n仍然要保存吗?'
+    );
+  };
+
   const openJsonFile = async (path, setter, mode, label, transform) => {
     setBusy(true);
     setStatus(null);
@@ -792,7 +809,10 @@ export default function AdminPage() {
   const removeHomepageButton = (i) =>
     setHomepage((s) => ({ ...s, data: { ...s.data, buttons: s.data.buttons.filter((b, idx) => idx !== i) } }));
 
-  const saveHomepage = () => saveJsonFile(homepage, setHomepage, '内容管理页面更新首页设置');
+  const saveHomepage = () => {
+    if (!confirmLinks(homepage.data.buttons.map((b) => b.url))) return;
+    return saveJsonFile(homepage, setHomepage, '内容管理页面更新首页设置');
+  };
 
   const openFooter = () =>
     openJsonFile('src/data/footer.json', setFooter, 'footer', '页脚设置', (raw) => ({
@@ -845,6 +865,7 @@ export default function AdminPage() {
     }));
 
   const saveFooter = () => {
+    if (!confirmLinks(footer.data.columns.flatMap((c) => c.links.map((l) => l.url)))) return;
     const fileData = {
       columns: footer.data.columns.map((c) => ({ title: c.title, links: c.links.map(formToLink) })),
       copyright: footer.data.copyright,
@@ -891,6 +912,7 @@ export default function AdminPage() {
     setNavbar((s) => ({ ...s, data: { ...s.data, items: s.data.items.filter((it, idx) => idx !== i) } }));
 
   const saveNavbar = () => {
+    if (!confirmLinks(navbar.data.items.filter((it) => it.type === 'link').map((it) => it.url))) return;
     const fileData = {
       items: navbar.data.items.map((it) =>
         it.type === 'docSidebar'
