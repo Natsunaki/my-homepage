@@ -8,15 +8,17 @@
     <subtitle>夏鸣Natsunaki的神秘小网站！ Blog</subtitle>
     <icon>https://Natsunaki.github.io/my-homepage/img/favicon.ico</icon>
     <entry>
-        <title type="html"><![CDATA[欢迎来到我的个人主页]]></title>
+        <title type="html"><![CDATA[欢迎来到我的个人主页！]]></title>
         <id>https://Natsunaki.github.io/my-homepage/blog/welcome</id>
         <link href="https://Natsunaki.github.io/my-homepage/blog/welcome"/>
         <updated>2026-10-16T12:00:00.000Z</updated>
         <summary type="html"><![CDATA[你好，这里是夏鸣Natsunaki！]]></summary>
-        <content type="html"><![CDATA[<p>##你好，这里是夏鸣Natsunaki！</p>
-<p>如你所见，夏鸣Natsunaki是我的名字，当然你也可以叫我虾米，嘻嘻
-虽然这个网站基本全是靠的别人，不过无论如何，这里还是属于我了，哇咔咔
-那么<strong>粗体文字</strong></p>]]></content>
+        <content type="html"><![CDATA[<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="你好这里是夏鸣natsunaki">你好，这里是夏鸣Natsunaki！<a href="https://natsunaki.github.io/my-homepage/blog/welcome#%E4%BD%A0%E5%A5%BD%E8%BF%99%E9%87%8C%E6%98%AF%E5%A4%8F%E9%B8%A3natsunaki" class="hash-link" aria-label="你好，这里是夏鸣Natsunaki！的直接链接" title="你好，这里是夏鸣Natsunaki！的直接链接" translate="no">​</a></h2>
+<p>如你所见，夏鸣Natsunaki是我的名字，当然你也可以叫我虾米，嘻嘻</p>
+<p>虽然这个网站基本全是靠的别人，不过无论如何，这里还是属于我了，哇咔咔</p>
+<p>不管你是否认识我，亦或是从未见过面，不过如果你看到了这里，祝你天天开心！</p>
+<p>来看看虾米做了什么！<del>尽管其实什么都没做</del></p>
+<p><a href="https://space.bilibili.com/1485559526?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer" class="">戳我进入虾米的B站喵</a></p>]]></content>
         <author>
             <name>你的名字</name>
         </author>
