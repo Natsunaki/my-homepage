@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
-        <title>夏鸣Ntasunaki的神秘小网站！ Blog</title>
+        <title>夏鸣Natsunaki的神秘小网站！ Blog</title>
         <link>https://Natsunaki.github.io/my-homepage/blog</link>
-        <description>夏鸣Ntasunaki的神秘小网站！ Blog</description>
+        <description>夏鸣Natsunaki的神秘小网站！ Blog</description>
         <lastBuildDate>Fri, 16 Oct 2026 12:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
