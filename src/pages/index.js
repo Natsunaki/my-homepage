@@ -1,43 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 
 import './index.css'; // 引入页面样式
 
+// 自动扫描背景图文件夹(新增背景图只需上传图片文件,无需修改任何代码):
+//   src/img/backgrounds/        电脑端使用的图(尽量放横向的图)
+//   src/img/backgrounds/mobile/ 只在手机端随机出现(适合竖图)
+const desktopCtx = require.context('../img/backgrounds', false, /\.(jpe?g|png|webp)$/i);
+const mobileCtx = require.context('../img/backgrounds/mobile', false, /\.(jpe?g|png|webp)$/i);
+
+// webpack 5 里图片模块是 { default: url } 的形式,这里统一取出真实地址
+function ctxUrls(ctx) {
+    return ctx.keys().map((key) => {
+        const mod = ctx(key);
+        return typeof mod === 'string' ? mod : (mod && mod.default) || mod;
+    });
+}
+
+const desktopBackgroundImages = ctxUrls(desktopCtx);
+const mobileBackgroundImages = [...ctxUrls(desktopCtx), ...ctxUrls(mobileCtx)];
+
 export default function HomePage() {
-    // 定义背景图片链接数组
-    // 图片放在 static/img/backgrounds/ 目录下，替换成你喜欢的图片即可
-    // 这里使用 useBaseUrl 处理路径，保证部署在子路径（如 /my-homepage/）下也能正常加载
-    const bg1 = useBaseUrl('/img/backgrounds/bg-1.jpg');
-    const bg2 = useBaseUrl('/img/backgrounds/bg-2.jpg');
-    const bg3 = useBaseUrl('/img/backgrounds/bg-3.jpg');
-    const bg4 = useBaseUrl('/img/backgrounds/bg-4.jpg');
-    const bg5 = useBaseUrl('/img/backgrounds/bg-5.jpg');
-    const bg6 = useBaseUrl('/img/backgrounds/bg-6.jpg');
-    const bg7 = useBaseUrl('/img/backgrounds/bg-7.jpg');
-
-    // 桌面端（横屏）：横图列表
-    const desktopBackgroundImages = [
-        bg2,
-        bg3,
-        bg4,
-        bg5,
-        bg6,
-        bg7,
-    ];
-
-    // 手机端（竖屏）：竖图 + 横图
-    const mobileBackgroundImages = [
-        bg1,
-        bg2,
-        bg3,
-        bg4,
-        bg5,
-        bg6,
-        bg7,
-    ];
-
     // 判断屏幕比例是否接近手机（高宽比大于1）
     var isMobileRatioOld;
     const isMobileRatio = () => {
