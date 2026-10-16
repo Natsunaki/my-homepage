@@ -6,6 +6,11 @@
 const isProd = process.env.NODE_ENV === 'production';
 const cloudflareToken = process.env.CLOUDFLARE_TOKEN;
 import { themes as prismThemes } from 'prism-react-renderer';
+import fs from 'node:fs';
+
+// 页脚(网站最下面的链接)内容来自 src/data/footer.json
+// 可以在「内容管理 → 🔗 页脚设置」里可视化修改
+const footerData = JSON.parse(fs.readFileSync('./src/data/footer.json', 'utf8'));
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -105,41 +110,17 @@ const config = {
       },
       footer: {
         style: 'light',
-        links: [
-          {
-            title: '关于',
-            items: [
-              {
-                label: '自我介绍',
-                to: '/docs/intro',
-              },
-            ],
-          },
-          {
-            title: '链接',
-            items: [
-              {
-                label: '博客',
-                to: '/blog',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/Natsunaki',
-              },
-            ],
-          },
-          {
-            title: '本项目',
-            items: [
-              {
-                label: '项目仓库',
-                href: 'https://github.com/Natsunaki/my-homepage',
-              },
-            ],
-          },
-        ],
-        // 如需备案号、许可证声明等，写在下面这行里
-        copyright: `Copyright © ${new Date().getFullYear()} 夏鸣. Built with Docusaurus.`,
+        // 内容来自 src/data/footer.json(「内容管理 → 🔗 页脚设置」可可视化修改)
+        links: footerData.columns.map((col) => ({
+          title: col.title,
+          items: col.links.map((link) =>
+            link.href
+              ? { label: link.label, href: link.href }
+              : { label: link.label, to: link.to }
+          ),
+        })),
+        // 如需备案号、许可证声明等，可以在 src/data/footer.json 的 copyright 里写
+        copyright: footerData.copyright,
       },
       prism: {
         theme: prismThemes.github,

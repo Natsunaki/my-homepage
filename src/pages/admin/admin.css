@@ -337,3 +337,33 @@ html[data-theme='dark'] .admin-badge--pos {
   border-radius: 5px;
   border: 1px solid var(--ifm-color-emphasis-300);
 }
+
+/* 首页/页脚设置 */
+
+.admin-link-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.4rem 0;
+}
+
+.admin-link-row .admin-input {
+  flex: 1;
+  min-width: 130px;
+}
+
+.admin-input--label {
+  max-width: 220px;
+}
+
+.admin-footer-col {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  margin: 0.8rem 0;
+  background: var(--ifm-background-surface-color);
+}
+
+.admin-footer-col .button {
+  margin-top: 0.2rem;
+}

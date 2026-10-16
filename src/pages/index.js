@@ -4,6 +4,9 @@ import Layout from '@theme/Layout';
 
 import './index.css'; // 引入页面样式
 
+// 首页文字与按钮来自 src/data/homepage.json(可在「内容管理 → 🏠 首页设置」里修改)
+import homepageContent from '../data/homepage.json';
+
 // 自动扫描背景图文件夹(新增背景图只需上传图片文件,无需修改任何代码):
 //   src/img/backgrounds/        电脑端使用的图(尽量放横向的图)
 //   src/img/backgrounds/mobile/ 只在手机端随机出现(适合竖图)
@@ -75,27 +78,34 @@ export default function HomePage() {
 
                 {/* 主体内容 */}
                 <div id="index-page-main">
-                    {/* 首页大标题，改成你自己的 */}
+                    {/* 标题 / 文字 / 按钮都来自 src/data/homepage.json */}
                     <div id="logo">
-                        <span>我的小窝</span>
+                        <span>{homepageContent.title}</span>
                     </div>
 
                     <div id="index-page-description">
-                        欢迎你的来访！！
+                        {homepageContent.description}
                     </div>
 
                     <div id="index-page-button-container">
                         <div id="index-page-button">
-                            <Link
-                                className="button button--secondary button--lg"
-                                to="./blog">
-                                博客
-                            </Link>
-                            <Link
-                                className="button button--secondary button--lg"
-                                to="./docs/intro">
-                                关于我
-                            </Link>
+                            {homepageContent.buttons.map((btn, i) =>
+                                btn.url && btn.url.startsWith('http') ? (
+                                    <a
+                                        key={i}
+                                        className="button button--secondary button--lg"
+                                        href={btn.url}>
+                                        {btn.label}
+                                    </a>
+                                ) : (
+                                    <Link
+                                        key={i}
+                                        className="button button--secondary button--lg"
+                                        to={btn.url || './blog'}>
+                                        {btn.label}
+                                    </Link>
+                                )
+                            )}
                         </div>
                     </div>
                 </div>

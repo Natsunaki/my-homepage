@@ -214,6 +214,8 @@ export default function AdminPage() {
   const [newDoc, setNewDoc] = useState({ title: '', name: '', dir: 'docs/' });
   const [appearance, setAppearance] = useState(null);
   const [comments, setComments] = useState(null);
+  const [homepage, setHomepage] = useState(null);
+  const [footer, setFooter] = useState(null);
   const taRef = useRef(null);
 
   useEffect(() => {
@@ -722,6 +724,131 @@ export default function AdminPage() {
     }
   };
 
+  // ---------- 首页设置 / 页脚设置(读写 src/data/*.json) ----------
+
+  // 链接统一规则:http 开头 = 外部链接(href);其余 = 站内路径(to)
+  const linkToForm = (l) => ({ label: l.label || '', url: l.href || l.to || '' });
+  const formToLink = (l) => (l.url.startsWith('http') ? { label: l.label, href: l.url } : { label: l.label, to: l.url });
+
+  const openJsonFile = async (path, setter, mode, label, transform) => {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const d = await gh(pat || null, `/repos/${OWNER}/${REPO}/contents/${encPath(path)}?ref=${BRANCH}`);
+      const raw = JSON.parse(b64decodeUtf8(d.content));
+      setter({ data: transform ? transform(raw) : raw, sha: d.sha, path });
+      setView({ mode });
+    } catch (e) {
+      setStatus({ type: 'err', text: '读取 ' + path + ' 失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveJsonFile = async (state, setter, message, fileData) => {
+    if (!pat || !state) {
+      setStatus({ type: 'err', text: '请先登录再保存。' });
+      return;
+    }
+    setBusy(true);
+    setStatus(null);
+    try {
+      const text = JSON.stringify(fileData || state.data, null, 2) + '\n';
+      const res = await gh(pat, `/repos/${OWNER}/${REPO}/contents/${encPath(state.path)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, content: b64encodeUtf8(text), sha: state.sha, branch: BRANCH }),
+      });
+      setter({ ...state, sha: res.content.sha });
+      setStatus({ type: 'ok', text: '已保存!约 2 分钟后网站更新,刷新首页/拉到页面底部即可看到。' });
+    } catch (e) {
+      setStatus({ type: 'err', text: '保存失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openHomepage = () =>
+    openJsonFile('src/data/homepage.json', setHomepage, 'homepage', '首页设置', (raw) => ({
+      title: raw.title || '',
+      description: raw.description || '',
+      buttons: (raw.buttons || []).map((b) => ({ label: b.label || '', url: b.url || '' })),
+    }));
+
+  const updateHomepage = (patch) => setHomepage((s) => s && { ...s, data: { ...s.data, ...patch } });
+
+  const setHomepageButton = (i, patch) =>
+    setHomepage((s) => ({
+      ...s,
+      data: { ...s.data, buttons: s.data.buttons.map((b, idx) => (idx === i ? { ...b, ...patch } : b)) },
+    }));
+
+  const addHomepageButton = () =>
+    setHomepage((s) => ({ ...s, data: { ...s.data, buttons: [...s.data.buttons, { label: '新按钮', url: './blog' }] } }));
+
+  const removeHomepageButton = (i) =>
+    setHomepage((s) => ({ ...s, data: { ...s.data, buttons: s.data.buttons.filter((b, idx) => idx !== i) } }));
+
+  const saveHomepage = () => saveJsonFile(homepage, setHomepage, '内容管理页面更新首页设置');
+
+  const openFooter = () =>
+    openJsonFile('src/data/footer.json', setFooter, 'footer', '页脚设置', (raw) => ({
+      columns: (raw.columns || []).map((c) => ({
+        title: c.title || '',
+        links: (c.links || []).map(linkToForm),
+      })),
+      copyright: raw.copyright || '',
+    }));
+
+  const updateFooter = (patch) => setFooter((s) => s && { ...s, data: { ...s.data, ...patch } });
+
+  const setFooterColumn = (ci, patch) =>
+    setFooter((s) => ({
+      ...s,
+      data: { ...s.data, columns: s.data.columns.map((c, i) => (i === ci ? { ...c, ...patch } : c)) },
+    }));
+
+  const setFooterLink = (ci, li, patch) =>
+    setFooter((s) => ({
+      ...s,
+      data: {
+        ...s.data,
+        columns: s.data.columns.map((c, i) =>
+          i === ci ? { ...c, links: c.links.map((l, j) => (j === li ? { ...l, ...patch } : l)) } : c
+        ),
+      },
+    }));
+
+  const addFooterLink = (ci) =>
+    setFooter((s) => ({
+      ...s,
+      data: {
+        ...s.data,
+        columns: s.data.columns.map((c, i) =>
+          i === ci ? { ...c, links: [...c.links, { label: '新链接', url: '' }] } : c
+        ),
+      },
+    }));
+
+  const removeFooterLink = (ci, li) =>
+    setFooter((s) => ({
+      ...s,
+      data: {
+        ...s.data,
+        columns: s.data.columns.map((c, i) =>
+          i === ci ? { ...c, links: c.links.filter((l, j) => j !== li) } : c
+        ),
+      },
+    }));
+
+  const saveFooter = () => {
+    const fileData = {
+      columns: footer.data.columns.map((c) => ({ title: c.title, links: c.links.map(formToLink) })),
+      copyright: footer.data.copyright,
+    };
+    return saveJsonFile(footer, setFooter, '内容管理页面更新页脚设置', fileData);
+  };
+
   // ---------- Markdown 工具栏 ----------
 
   const insertMd = (prefix, suffix = '', placeholder = '') => {
@@ -885,6 +1012,12 @@ export default function AdminPage() {
                   setStatus(null);
                 }}>
                 + 新建文档
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={openHomepage}>
+                🏠 首页设置
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={openFooter}>
+                🔗 页脚设置
               </button>
               <button className="button button--secondary" disabled={busy} onClick={openAppearance}>
                 🎨 外观设置
@@ -1197,6 +1330,122 @@ export default function AdminPage() {
             <div className="admin-list-actions">
               <button className="button button--primary" disabled={busy} onClick={saveComments}>
                 {busy ? '保存中…' : '保存评论设置'}
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
+                返回列表
+              </button>
+            </div>
+          </div>
+        )}
+
+        {view.mode === 'homepage' && homepage && (
+          <div className="admin-new-view">
+            <h2>首页设置(大标题 / 文字 / 按钮)</h2>
+            <label className="admin-field">
+              大标题:
+              <input
+                className="admin-input"
+                value={homepage.data.title}
+                onChange={(e) => updateHomepage({ title: e.target.value })}
+              />
+            </label>
+            <label className="admin-field">
+              标题下面的文字:
+              <input
+                className="admin-input"
+                value={homepage.data.description}
+                onChange={(e) => updateHomepage({ description: e.target.value })}
+              />
+            </label>
+            <h3>按钮</h3>
+            {homepage.data.buttons.map((btn, i) => (
+              <div className="admin-link-row" key={i}>
+                <input
+                  className="admin-input admin-input--label"
+                  placeholder="按钮文字"
+                  value={btn.label}
+                  onChange={(e) => setHomepageButton(i, { label: e.target.value })}
+                />
+                <input
+                  className="admin-input"
+                  placeholder="跳转地址(如 ./blog 或 https://…)"
+                  value={btn.url}
+                  onChange={(e) => setHomepageButton(i, { url: e.target.value })}
+                />
+                <button className="button button--secondary admin-small-btn" onClick={() => removeHomepageButton(i)}>
+                  删除
+                </button>
+              </div>
+            ))}
+            <div className="admin-list-actions">
+              <button className="button button--secondary admin-small-btn" onClick={addHomepageButton}>
+                + 添加按钮
+              </button>
+            </div>
+            <div className="admin-list-actions">
+              <button className="button button--primary" disabled={busy} onClick={saveHomepage}>
+                {busy ? '保存中…' : '保存首页设置'}
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
+                返回列表
+              </button>
+            </div>
+            <p className="admin-note">
+              地址规则:`http` 开头 = 外部网站;`./blog`、`/docs/intro` 这样的 = 站内页面。保存后约 2 分钟生效。
+            </p>
+          </div>
+        )}
+
+        {view.mode === 'footer' && footer && (
+          <div className="admin-new-view">
+            <h2>页脚设置(网站最下面的链接)</h2>
+            {footer.data.columns.map((col, ci) => (
+              <div className="admin-footer-col" key={ci}>
+                <label className="admin-field">
+                  栏目标题:
+                  <input
+                    className="admin-input"
+                    value={col.title}
+                    onChange={(e) => setFooterColumn(ci, { title: e.target.value })}
+                  />
+                </label>
+                {col.links.map((link, li) => (
+                  <div className="admin-link-row" key={li}>
+                    <input
+                      className="admin-input admin-input--label"
+                      placeholder="显示文字"
+                      value={link.label}
+                      onChange={(e) => setFooterLink(ci, li, { label: e.target.value })}
+                    />
+                    <input
+                      className="admin-input"
+                      placeholder="地址(http 开头 = 外链)"
+                      value={link.url}
+                      onChange={(e) => setFooterLink(ci, li, { url: e.target.value })}
+                    />
+                    <button
+                      className="button button--secondary admin-small-btn"
+                      onClick={() => removeFooterLink(ci, li)}>
+                      删除
+                    </button>
+                  </div>
+                ))}
+                <button className="button button--secondary admin-small-btn" onClick={() => addFooterLink(ci)}>
+                  + 添加链接
+                </button>
+              </div>
+            ))}
+            <label className="admin-field">
+              底部版权行:
+              <input
+                className="admin-input"
+                value={footer.data.copyright}
+                onChange={(e) => updateFooter({ copyright: e.target.value })}
+              />
+            </label>
+            <div className="admin-list-actions">
+              <button className="button button--primary" disabled={busy} onClick={saveFooter}>
+                {busy ? '保存中…' : '保存页脚设置'}
               </button>
               <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
                 返回列表

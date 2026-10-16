@@ -1,0 +1,8 @@
+{
+  "title": "我的小窝",
+  "description": "欢迎你的来访！！",
+  "buttons": [
+    { "label": "博客", "url": "./blog" },
+    { "label": "关于我", "url": "./docs/intro" }
+  ]
+}
