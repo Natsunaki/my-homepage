@@ -37,4 +37,16 @@
         </author>
         <category label="随笔" term="随笔"/>
     </entry>
+    <entry>
+        <title type="html"><![CDATA[test]]></title>
+        <id>https://Natsunaki.github.io/my-homepage/blog/what</id>
+        <link href="https://Natsunaki.github.io/my-homepage/blog/what"/>
+        <updated>2026-10-16T11:49:00.000Z</updated>
+        <summary type="html"><![CDATA[在这里写正文(支持 Markdown 语法)……]]></summary>
+        <content type="html"><![CDATA[<p>在这里写正文(支持 Markdown 语法)……</p>]]></content>
+        <author>
+            <name>夏鸣</name>
+        </author>
+        <category label="随笔" term="随笔"/>
+    </entry>
 </feed>
