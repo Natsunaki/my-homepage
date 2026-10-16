@@ -14,7 +14,7 @@
     },
     {
       "type": "docSidebar",
-      "label": "世界观",
+      "label": "原创世界观",
       "sidebarId": "worldSidebar",
       "docsPluginId": "world",
       "position": "left"
