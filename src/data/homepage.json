@@ -9,6 +9,10 @@
     {
       "label": "关于我",
       "url": "./docs/intro"
+    },
+    {
+      "label": "世界观",
+      "url": "./world_building"
     }
   ]
 }
