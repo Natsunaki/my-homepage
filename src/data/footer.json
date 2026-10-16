@@ -3,20 +3,36 @@
     {
       "title": "关于",
       "links": [
-        { "label": "自我介绍", "to": "/docs/intro" }
+        {
+          "label": "自我介绍",
+          "to": "/docs/intro"
+        }
       ]
     },
     {
       "title": "链接",
       "links": [
-        { "label": "博客", "to": "/blog" },
-        { "label": "GitHub", "href": "https://github.com/Natsunaki" }
+        {
+          "label": "虾米的博客",
+          "to": "/blog"
+        },
+        {
+          "label": "虾米的B站",
+          "href": "https://space.bilibili.com/1485559526?spm_id_from=333.1007.0.0"
+        },
+        {
+          "label": "GitHub",
+          "href": "https://github.com/Natsunaki"
+        }
       ]
     },
     {
       "title": "本项目",
       "links": [
-        { "label": "项目仓库", "href": "https://github.com/Natsunaki/my-homepage" }
+        {
+          "label": "项目仓库",
+          "href": "https://github.com/Natsunaki/my-homepage"
+        }
       ]
     }
   ],
