@@ -1,7 +1,7 @@
 /* 内容管理页面样式 */
 
 .admin-wrap {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 1.5rem 1rem 4rem;
 }
@@ -141,8 +141,17 @@ html[data-theme='dark'] .admin-status--info {
   margin: 0.4rem 0 0;
 }
 
-.admin-file-list li {
-  margin: 0.15rem 0;
+.admin-file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed var(--ifm-color-emphasis-200);
+}
+
+.admin-file-row:last-child {
+  border-bottom: none;
 }
 
 .admin-file-link {
@@ -154,12 +163,50 @@ html[data-theme='dark'] .admin-status--info {
   color: var(--ifm-link-color);
   font-size: 0.98rem;
   text-align: left;
-  width: 100%;
+  flex: 1;
+  min-width: 200px;
   overflow-wrap: anywhere;
 }
 
 .admin-file-link:hover {
   background: var(--ifm-color-emphasis-100);
+}
+
+.admin-file-date {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 0 0.45rem;
+  margin-right: 0.35rem;
+  border-radius: 5px;
+  background: #ffd666;
+  color: #664d00;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  vertical-align: 1px;
+}
+
+.admin-badge--pos {
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-800);
+}
+
+html[data-theme='dark'] .admin-badge {
+  background: #8a6d1a;
+  color: #ffefc2;
+}
+
+html[data-theme='dark'] .admin-badge--pos {
+  background: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-900);
+}
+
+.admin-small-btn {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.82rem;
 }
 
 .admin-field {
@@ -192,6 +239,25 @@ html[data-theme='dark'] .admin-status--info {
   margin-bottom: 0;
 }
 
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+}
+
+@media (min-width: 1100px) {
+  .admin-editor-grid--with-preview {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .admin-textarea {
   width: 100%;
   min-height: 58vh;
@@ -207,4 +273,18 @@ html[data-theme='dark'] .admin-status--info {
   white-space: pre;
   overflow-wrap: normal;
   overflow-x: auto;
+}
+
+.admin-preview {
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  background: var(--ifm-background-surface-color);
+  min-height: 58vh;
+  max-height: 75vh;
+  overflow: auto;
+}
+
+.admin-preview img {
+  max-width: 100%;
 }

@@ -51,6 +51,10 @@ const config = {
           blogSidebarTitle: '最新文章',
           blogSidebarCount: 10,
           showReadingTime: true,
+          // 允许在文章 frontmatter 里直接写作者信息(不要求 authors.yml)
+          onInlineAuthors: 'ignore',
+          // 不强制要求文章写「摘要截断标记」
+          onUntruncatedBlogPosts: 'ignore',
 
         },
         theme: {
