@@ -10,7 +10,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   // 站点标题与副标题，改成你自己的
-  title: '我的个人主页',
+  title: '夏鸣Ntasunaki的神秘小网站！',
   tagline: '记录与分享',
   favicon: 'img/favicon.ico',
 
@@ -78,7 +78,7 @@ const config = {
       // Replace with your project's social card
       image: 'img/social-card.png',
       navbar: {
-        title: '我的个人主页',
+        title: '夏鸣Natsunaki的神秘小网站！',
         logo: {
           alt: 'Site Logo',
           src: 'img/logo.svg',
