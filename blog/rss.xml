@@ -16,18 +16,18 @@
             <description><![CDATA[这是站点搭建完成后的第一篇文章，也是一篇写作示例。]]></description>
             <content:encoded><![CDATA[<p>这是站点搭建完成后的第一篇文章，也是一篇写作示例。</p>
 <p>你可以直接修改这篇文件，或者把它删掉，换成自己的文章。</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="怎么发新文章">怎么发新文章<a href="https://natsunaki.github.io/my-homepage/blog/welcome#%E6%80%8E%E4%B9%88%E5%8F%91%E6%96%B0%E6%96%87%E7%AB%A0" class="hash-link" aria-label="怎么发新文章的直接链接" title="怎么发新文章的直接链接">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="怎么发新文章">怎么发新文章<a href="https://natsunaki.github.io/my-homepage/blog/welcome#%E6%80%8E%E4%B9%88%E5%8F%91%E6%96%B0%E6%96%87%E7%AB%A0" class="hash-link" aria-label="怎么发新文章的直接链接" title="怎么发新文章的直接链接" translate="no">​</a></h2>
 <ol>
-<li>在 <code>blog</code> 目录下新建一个 <code>.md</code> 文件</li>
-<li>顶部写上 frontmatter（也就是上面 <code>---</code> 之间的部分）：
+<li class="">在 <code>blog</code> 目录下新建一个 <code>.md</code> 文件</li>
+<li class="">顶部写上 frontmatter（也就是上面 <code>---</code> 之间的部分）：
 日期、标题、标签、作者等</li>
-<li>正文里正常使用 Markdown 书写</li>
+<li class="">正文里正常使用 Markdown 书写</li>
 </ol>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="支持的功能">支持的功能<a href="https://natsunaki.github.io/my-homepage/blog/welcome#%E6%94%AF%E6%8C%81%E7%9A%84%E5%8A%9F%E8%83%BD" class="hash-link" aria-label="支持的功能的直接链接" title="支持的功能的直接链接">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="支持的功能">支持的功能<a href="https://natsunaki.github.io/my-homepage/blog/welcome#%E6%94%AF%E6%8C%81%E7%9A%84%E5%8A%9F%E8%83%BD" class="hash-link" aria-label="支持的功能的直接链接" title="支持的功能的直接链接" translate="no">​</a></h2>
 <ul>
-<li>支持<strong>代码高亮</strong>、表格、引用等常见 Markdown 语法</li>
-<li>每篇文章下方有评论区（需先配置 giscus，见 README）</li>
-<li>文章左侧会自动生成最近文章的侧边栏</li>
+<li class="">支持<strong>代码高亮</strong>、表格、引用等常见 Markdown 语法</li>
+<li class="">每篇文章下方有评论区（需先配置 giscus，见 README）</li>
+<li class="">文章左侧会自动生成最近文章的侧边栏</li>
 </ul>
 <blockquote>
 <p>提示：作者头像使用的是 <code>static/img/avatar.png</code>，
