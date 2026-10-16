@@ -12,17 +12,30 @@ export default function HomePage() {
     const bg1 = useBaseUrl('/img/backgrounds/bg-1.jpg');
     const bg2 = useBaseUrl('/img/backgrounds/bg-2.jpg');
     const bg3 = useBaseUrl('/img/backgrounds/bg-3.jpg');
+    const bg4 = useBaseUrl('/img/backgrounds/bg-4.jpg');
+    const bg5 = useBaseUrl('/img/backgrounds/bg-5.jpg');
+    const bg6 = useBaseUrl('/img/backgrounds/bg-6.jpg');
+    const bg7 = useBaseUrl('/img/backgrounds/bg-7.jpg');
 
+    // 桌面端（横屏）：横图列表
     const desktopBackgroundImages = [
-        bg1,
         bg2,
         bg3,
+        bg4,
+        bg5,
+        bg6,
+        bg7,
     ];
 
+    // 手机端（竖屏）：竖图 + 横图
     const mobileBackgroundImages = [
         bg1,
         bg2,
         bg3,
+        bg4,
+        bg5,
+        bg6,
+        bg7,
     ];
 
     // 判断屏幕比例是否接近手机（高宽比大于1）

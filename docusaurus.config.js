@@ -85,7 +85,7 @@ const config = {
         title: '夏鸣Natsunaki的神秘小网站！',
         logo: {
           alt: 'Site Logo',
-          src: 'img/logo.svg',
+          src: 'img/logo.png',
         },
         items: [
           { to: '/blog', label: '博客', position: 'left' },
