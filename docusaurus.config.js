@@ -73,7 +73,7 @@ const config = {
       // （需要仓库为 Public 并安装 giscus App；未配置时评论区会显示一段提示文字）
       giscus: {
         repo: 'Natsunaki/my-homepage',
-        repoId: '',
+        repoId: 'R_kgDOVLqP7Q',
         category: '',
         categoryId: '',
       },
@@ -139,7 +139,7 @@ const config = {
           },
         ],
         // 如需备案号、许可证声明等，写在下面这行里
-        copyright: `Copyright © ${new Date().getFullYear()} 你的名字. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} 夏鸣. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

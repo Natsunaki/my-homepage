@@ -94,6 +94,85 @@ function setFm(content, key, value) {
   return `---\n${lines.join('\n')}\n---\n` + parts.rest;
 }
 
+// ---------- 颜色工具(外观设置用) ----------
+
+const DEFAULT_LIGHT = { primary: '#ff99b8', heading: '#1c1e21', text: '#1c1e21' };
+const DEFAULT_DARK = { primary: '#ff9ee0', heading: '#e3e3e3', text: '#e3e3e3' };
+
+function clamp01(x) {
+  return Math.min(1, Math.max(0, x));
+}
+
+function hexToRgb(hex) {
+  const m = String(hex).replace('#', '');
+  return [parseInt(m.slice(0, 2), 16) / 255, parseInt(m.slice(2, 4), 16) / 255, parseInt(m.slice(4, 6), 16) / 255];
+}
+
+function rgbToHex(r, g, b) {
+  const p = (n) => Math.round(Math.min(255, Math.max(0, n * 255))).toString(16).padStart(2, '0');
+  return '#' + p(r) + p(g) + p(b);
+}
+
+// 把颜色整体调亮/调暗(dL 为亮度增量,范围约 -0.4 ~ 0.4)
+function shiftLightness(hex, dL) {
+  let [r, g, b] = hexToRgb(hex);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  let l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h /= 6;
+  }
+  l = clamp01(l + dL);
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const f = (t) => {
+      let x = t;
+      if (x < 0) x += 1;
+      if (x > 1) x -= 1;
+      if (x < 1 / 6) return p + (q - p) * 6 * x;
+      if (x < 1 / 2) return q;
+      if (x < 2 / 3) return p + (q - p) * (2 / 3 - x) * 6;
+      return p;
+    };
+    r = f(h + 1 / 3);
+    g = f(h);
+    b = f(h - 1 / 3);
+  }
+  return rgbToHex(r, g, b);
+}
+
+// 从一个主题色派生整套深浅色阶(与 Infima 变量一一对应)
+function primaryShades(hex) {
+  return {
+    '--ifm-color-primary': hex,
+    '--ifm-color-primary-dark': shiftLightness(hex, -0.08),
+    '--ifm-color-primary-darker': shiftLightness(hex, -0.14),
+    '--ifm-color-primary-darkest': shiftLightness(hex, -0.3),
+    '--ifm-color-primary-light': shiftLightness(hex, 0.12),
+    '--ifm-color-primary-lighter': shiftLightness(hex, 0.2),
+    '--ifm-color-primary-lightest': shiftLightness(hex, 0.4),
+  };
+}
+
+function pickVar(cssText, name) {
+  const m = cssText.match(new RegExp(name + '\\s*:\\s*([^;]+);'));
+  return m ? m[1].trim() : '';
+}
+
+function replaceVar(cssText, name, value) {
+  return cssText.replace(new RegExp('(' + name + '\\s*:\\s*)([^;]+)(;)'), '$1' + value + '$3');
+}
+
 const BLOG_TEMPLATE = (title, slug) => `---
 date: ${nowLocal()}
 slug: ${slug}
@@ -101,7 +180,7 @@ title: ${title}
 tags: [随笔]
 authors:
   name: 夏鸣
-  image_url: ../img/avatar.png
+  image_url: /img/avatar.png
 ---
 
 在这里写正文(支持 Markdown 语法)……
@@ -133,6 +212,8 @@ export default function AdminPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', name: '' });
   const [newDoc, setNewDoc] = useState({ title: '', name: '', dir: 'docs/' });
+  const [appearance, setAppearance] = useState(null);
+  const [comments, setComments] = useState(null);
   const taRef = useRef(null);
 
   useEffect(() => {
@@ -498,6 +579,149 @@ export default function AdminPage() {
     }
   };
 
+  // ---------- 外观设置（颜色） ----------
+
+  const openAppearance = async () => {
+    if (!pat) {
+      setStatus({ type: 'err', text: '请先登录(需要写入权限)再修改外观。' });
+      return;
+    }
+    setBusy(true);
+    setStatus(null);
+    try {
+      const d = await gh(pat, `/repos/${OWNER}/${REPO}/contents/src/css/custom.css?ref=${BRANCH}`);
+      const css = b64decodeUtf8(d.content);
+      const idx = css.indexOf("[data-theme='dark']");
+      const lightPart = idx >= 0 ? css.slice(0, idx) : css;
+      const darkPart = idx >= 0 ? css.slice(idx) : css;
+      setAppearance({
+        css,
+        sha: d.sha,
+        lightPrimary: pickVar(lightPart, '--ifm-color-primary') || DEFAULT_LIGHT.primary,
+        lightHeading: pickVar(lightPart, '--ifm-heading-color') || DEFAULT_LIGHT.heading,
+        lightText: pickVar(lightPart, '--ifm-font-color-base') || DEFAULT_LIGHT.text,
+        darkPrimary: pickVar(darkPart, '--ifm-color-primary') || DEFAULT_DARK.primary,
+        darkHeading: pickVar(darkPart, '--ifm-heading-color') || DEFAULT_DARK.heading,
+        darkText: pickVar(darkPart, '--ifm-font-color-base') || DEFAULT_DARK.text,
+      });
+      setView({ mode: 'appearance' });
+    } catch (e) {
+      setStatus({ type: 'err', text: '读取样式文件失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveAppearance = async () => {
+    if (!pat || !appearance) {
+      setStatus({ type: 'err', text: '请先登录再保存。' });
+      return;
+    }
+    setBusy(true);
+    setStatus(null);
+    try {
+      const idx = appearance.css.indexOf("[data-theme='dark']");
+      let lightPart = idx >= 0 ? appearance.css.slice(0, idx) : appearance.css;
+      let darkPart = idx >= 0 ? appearance.css.slice(idx) : '';
+
+      const applyShades = (text, primary, heading, text2) => {
+        let out = text;
+        const shades = primaryShades(primary);
+        Object.keys(shades).forEach((k) => {
+          out = replaceVar(out, k, shades[k]);
+        });
+        out = replaceVar(out, '--ifm-heading-color', heading);
+        out = replaceVar(out, '--ifm-font-color-base', text2);
+        return out;
+      };
+
+      lightPart = applyShades(lightPart, appearance.lightPrimary, appearance.lightHeading, appearance.lightText);
+      if (idx >= 0) {
+        darkPart = applyShades(darkPart, appearance.darkPrimary, appearance.darkHeading, appearance.darkText);
+      }
+      const nextCss = lightPart + darkPart;
+
+      const res = await gh(pat, `/repos/${OWNER}/${REPO}/contents/src/css/custom.css`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: '内容管理页面更新外观颜色',
+          content: b64encodeUtf8(nextCss),
+          sha: appearance.sha,
+          branch: BRANCH,
+        }),
+      });
+      setAppearance({ ...appearance, css: nextCss, sha: res.content.sha });
+      setStatus({ type: 'ok', text: '外观已保存!约 2 分钟后网站更新,刷新即可看到新颜色。' });
+    } catch (e) {
+      setStatus({ type: 'err', text: '保存失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // ---------- 评论设置（giscus） ----------
+
+  const openComments = async () => {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const d = await gh(pat || null, `/repos/${OWNER}/${REPO}/contents/docusaurus.config.js?ref=${BRANCH}`);
+      const text = b64decodeUtf8(d.content);
+      const pick = (key) => {
+        const m = text.match(new RegExp(key + ":\\s*'([^']*)'"));
+        return m ? m[1] : '';
+      };
+      setComments({
+        text,
+        sha: d.sha,
+        repoId: pick('repoId'),
+        category: pick('category'),
+        categoryId: pick('categoryId'),
+      });
+      setView({ mode: 'comments' });
+    } catch (e) {
+      setStatus({ type: 'err', text: '读取配置文件失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveComments = async () => {
+    if (!pat || !comments) {
+      setStatus({ type: 'err', text: '请先登录再保存。' });
+      return;
+    }
+    setBusy(true);
+    setStatus(null);
+    try {
+      let text = comments.text;
+      const setKey = (key, value) => {
+        text = text.replace(new RegExp('(' + key + ":\\s*')[^']*(')"), '$1' + value + '$2');
+      };
+      setKey('repoId', comments.repoId.trim());
+      setKey('category', comments.category.trim());
+      setKey('categoryId', comments.categoryId.trim());
+
+      const res = await gh(pat, `/repos/${OWNER}/${REPO}/contents/docusaurus.config.js`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: '内容管理页面更新评论(giscus)配置',
+          content: b64encodeUtf8(text),
+          sha: comments.sha,
+          branch: BRANCH,
+        }),
+      });
+      setComments({ ...comments, text, sha: res.content.sha });
+      setStatus({ type: 'ok', text: '评论配置已保存!约 2 分钟后网站更新,文章底部就会出现评论区。' });
+    } catch (e) {
+      setStatus({ type: 'err', text: '保存失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ---------- Markdown 工具栏 ----------
 
   const insertMd = (prefix, suffix = '', placeholder = '') => {
@@ -662,6 +886,12 @@ export default function AdminPage() {
                 }}>
                 + 新建文档
               </button>
+              <button className="button button--secondary" disabled={busy} onClick={openAppearance}>
+                🎨 外观设置
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={openComments}>
+                💬 评论设置
+              </button>
               <button className="button button--secondary" disabled={busy} onClick={() => loadFiles(pat || null)}>
                 刷新列表
               </button>
@@ -796,6 +1026,177 @@ export default function AdminPage() {
             <div className="admin-list-actions">
               <button className="button button--primary" disabled={busy} onClick={createDoc}>
                 创建
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
+                返回列表
+              </button>
+            </div>
+          </div>
+        )}
+
+        {view.mode === 'appearance' && appearance && (
+          <div className="admin-new-view">
+            <h2>外观设置(颜色)</h2>
+            <p className="admin-note">
+              主题色会自动派生出一整套深浅色(按钮、链接、导航高亮都会跟着变);保存后约 2 分钟网站更新。
+            </p>
+
+            <h3>亮色模式</h3>
+            <div className="admin-color-grid">
+              <label className="admin-color-item">
+                主题色
+                <input
+                  type="color"
+                  value={appearance.lightPrimary}
+                  onChange={(e) => setAppearance({ ...appearance, lightPrimary: e.target.value })}
+                />
+                <code className="admin-hex">{appearance.lightPrimary}</code>
+              </label>
+              <label className="admin-color-item">
+                标题颜色
+                <input
+                  type="color"
+                  value={appearance.lightHeading}
+                  onChange={(e) => setAppearance({ ...appearance, lightHeading: e.target.value })}
+                />
+                <code className="admin-hex">{appearance.lightHeading}</code>
+              </label>
+              <label className="admin-color-item">
+                正文颜色
+                <input
+                  type="color"
+                  value={appearance.lightText}
+                  onChange={(e) => setAppearance({ ...appearance, lightText: e.target.value })}
+                />
+                <code className="admin-hex">{appearance.lightText}</code>
+              </label>
+            </div>
+            <div className="admin-swatches">
+              {Object.values(primaryShades(appearance.lightPrimary)).map((c) => (
+                <span key={c + '_l'} className="admin-swatch" style={{ background: c }} title={c} />
+              ))}
+            </div>
+
+            <h3>暗色模式</h3>
+            <div className="admin-color-grid">
+              <label className="admin-color-item">
+                主题色
+                <input
+                  type="color"
+                  value={appearance.darkPrimary}
+                  onChange={(e) => setAppearance({ ...appearance, darkPrimary: e.target.value })}
+                />
+                <code className="admin-hex">{appearance.darkPrimary}</code>
+              </label>
+              <label className="admin-color-item">
+                标题颜色
+                <input
+                  type="color"
+                  value={appearance.darkHeading}
+                  onChange={(e) => setAppearance({ ...appearance, darkHeading: e.target.value })}
+                />
+                <code className="admin-hex">{appearance.darkHeading}</code>
+              </label>
+              <label className="admin-color-item">
+                正文颜色
+                <input
+                  type="color"
+                  value={appearance.darkText}
+                  onChange={(e) => setAppearance({ ...appearance, darkText: e.target.value })}
+                />
+                <code className="admin-hex">{appearance.darkText}</code>
+              </label>
+            </div>
+            <div className="admin-swatches">
+              {Object.values(primaryShades(appearance.darkPrimary)).map((c) => (
+                <span key={c + '_d'} className="admin-swatch" style={{ background: c }} title={c} />
+              ))}
+            </div>
+
+            <div className="admin-list-actions">
+              <button className="button button--primary" disabled={busy} onClick={saveAppearance}>
+                {busy ? '保存中…' : '保存外观'}
+              </button>
+              <button
+                className="button button--secondary"
+                disabled={busy}
+                onClick={() =>
+                  setAppearance({
+                    ...appearance,
+                    lightPrimary: DEFAULT_LIGHT.primary,
+                    lightHeading: DEFAULT_LIGHT.heading,
+                    lightText: DEFAULT_LIGHT.text,
+                    darkPrimary: DEFAULT_DARK.primary,
+                    darkHeading: DEFAULT_DARK.heading,
+                    darkText: DEFAULT_DARK.text,
+                  })
+                }>
+                恢复默认颜色
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
+                返回列表
+              </button>
+            </div>
+          </div>
+        )}
+
+        {view.mode === 'comments' && comments && (
+          <div className="admin-new-view">
+            <h2>评论设置(giscus)</h2>
+            <details className="admin-help" open>
+              <summary>怎么拿到下面这三个值?(需要在 GitHub 网页上点几下,只需一次)</summary>
+              <ol>
+                <li>
+                  开启 Discussions:打开
+                  <a href="https://github.com/Natsunaki/my-homepage/settings" target="_blank" rel="noreferrer">
+                    仓库设置
+                  </a>
+                  → Features 一节勾选 Discussions
+                </li>
+                <li>
+                  安装 giscus 应用:打开
+                  <a href="https://github.com/apps/giscus" target="_blank" rel="noreferrer">
+                    github.com/apps/giscus
+                  </a>
+                  → Install → 选择 my-homepage 仓库 → 授权
+                </li>
+                <li>
+                  打开
+                  <a href="https://giscus.app/zh-CN" target="_blank" rel="noreferrer">
+                    giscus.app
+                  </a>
+                  → 仓库填 Natsunaki/my-homepage → 分类选 Announcements → 页面上会生成 repoId / category / categoryId 三个值
+                </li>
+                <li>把三个值粘贴到下面,点保存</li>
+              </ol>
+            </details>
+            <label className="admin-field">
+              repoId(GitHub 仓库 ID):
+              <input
+                className="admin-input"
+                value={comments.repoId}
+                onChange={(e) => setComments({ ...comments, repoId: e.target.value })}
+              />
+            </label>
+            <label className="admin-field">
+              category(Discussion 分类名,例如 Announcements):
+              <input
+                className="admin-input"
+                value={comments.category}
+                onChange={(e) => setComments({ ...comments, category: e.target.value })}
+              />
+            </label>
+            <label className="admin-field">
+              categoryId(分类 ID):
+              <input
+                className="admin-input"
+                value={comments.categoryId}
+                onChange={(e) => setComments({ ...comments, categoryId: e.target.value })}
+              />
+            </label>
+            <div className="admin-list-actions">
+              <button className="button button--primary" disabled={busy} onClick={saveComments}>
+                {busy ? '保存中…' : '保存评论设置'}
               </button>
               <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
                 返回列表
