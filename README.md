@@ -48,7 +48,7 @@ npm run serve      # 本地预览构建产物
 | --- | --- |
 | 站名 / 副标题 / 导航栏 | `docusaurus.config.js` 的 `title` `tagline` `navbar` |
 | 首页文字、背景图逻辑 | `src/pages/index.js`（配合 `src/pages/index.css`） |
-| 首页背景图片 | 替换 `static/img/backgrounds/` 下的图片（可增删，注意同步 `index.js` 里的列表） |
+| 首页背景图片 | 往 `src/img/backgrounds/` 里添加图片即可（自动扫描，无需改代码；只在手机显示的竖图放 `mobile/` 子目录） |
 | 「关于我」页面 | `docs/intro.md` |
 | 头像 | 替换 `static/img/avatar.png` |
 | Logo / 站点图标 | 替换 `static/img/logo.svg`、`static/img/favicon.ico` |
@@ -95,10 +95,11 @@ npm run serve      # 本地预览构建产物
 │   │   ├── Comment.tsx          # giscus 评论组件
 │   │   └── IframeWithDynamicSrc.js  # 支持明暗主题切换的 iframe 组件
 │   ├── css/custom.css           # 全局主题配色
-│   ├── pages/                   # 自定义页面（首页在这里）
-│   └── theme/                   # swizzle 的主题组件（给博客/文档页挂评论区）
+│   ├── img/backgrounds/         # 首页随机背景图（自动扫描；mobile/ 子目录仅手机端）
+│   ├── pages/                   # 自定义页面（首页、内容管理页在这里）
+│   └── theme/                   # swizzle 的主题组件
 ├── static/                      # 静态资源（图片等，原样发布）
-│   └── img/                     # logo / favicon / 头像 / 背景图 / 社交卡片
+│   └── img/                     # logo / favicon / 头像 / 社交卡片
 ├── docusaurus.config.js         # 站点主配置
 ├── sidebars.js                  # 文档侧边栏配置
 └── .github/workflows/           # GitHub Actions 自动部署
