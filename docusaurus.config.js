@@ -10,7 +10,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   // 站点标题与副标题，改成你自己的
-  title: '夏鸣Ntasunaki的神秘小网站！',
+  title: '夏鸣Natsunaki的神秘小网站！',
   tagline: '记录与分享',
   favicon: 'img/favicon.ico',
 
