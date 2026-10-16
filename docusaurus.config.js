@@ -12,6 +12,10 @@ import fs from 'node:fs';
 // 可以在「内容管理 → 🔗 页脚设置」里可视化修改
 const footerData = JSON.parse(fs.readFileSync('./src/data/footer.json', 'utf8'));
 
+// 导航栏(顶部那排链接)内容来自 src/data/navbar.json
+// 可以在「内容管理 → 🧭 导航栏设置」里可视化修改
+const navbarData = JSON.parse(fs.readFileSync('./src/data/navbar.json', 'utf8'));
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   // 站点标题与副标题，改成你自己的
@@ -92,21 +96,19 @@ const config = {
           alt: 'Site Logo',
           src: 'img/logo.png',
         },
-        items: [
-          { to: '/blog', label: '博客', position: 'left' },
-          {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
-            position: 'left',
-            label: '文档',
-          },
-
-          {
-            href: 'https://github.com/Natsunaki',
-            label: 'GitHub',
-            position: 'right',
-          },
-        ],
+        // 导航栏链接来自 src/data/navbar.json(「内容管理 → 🧭 导航栏设置」可可视化修改)
+        items: navbarData.items.map((item) =>
+          item.type === 'docSidebar'
+            ? {
+              type: 'docSidebar',
+              sidebarId: item.sidebarId,
+              label: item.label,
+              position: item.position,
+            }
+            : item.url.startsWith('http')
+              ? { href: item.url, label: item.label, position: item.position }
+              : { to: item.url, label: item.label, position: item.position }
+        ),
       },
       footer: {
         style: 'light',

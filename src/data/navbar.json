@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "type": "link", "label": "博客", "url": "/blog", "position": "left" },
+    { "type": "docSidebar", "label": "文档", "sidebarId": "tutorialSidebar", "position": "left" },
+    { "type": "link", "label": "GitHub", "url": "https://github.com/Natsunaki", "position": "right" }
+  ]
+}

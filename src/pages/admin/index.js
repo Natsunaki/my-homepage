@@ -216,6 +216,9 @@ export default function AdminPage() {
   const [comments, setComments] = useState(null);
   const [homepage, setHomepage] = useState(null);
   const [footer, setFooter] = useState(null);
+  const [navbar, setNavbar] = useState(null);
+  const [manual, setManual] = useState(null);
+  const [collapsed, setCollapsed] = useState({});
   const taRef = useRef(null);
 
   useEffect(() => {
@@ -849,6 +852,174 @@ export default function AdminPage() {
     return saveJsonFile(footer, setFooter, '内容管理页面更新页脚设置', fileData);
   };
 
+  // ---------- 导航栏设置 ----------
+
+  const openNavbar = () =>
+    openJsonFile('src/data/navbar.json', setNavbar, 'navbar', '导航栏设置', (raw) => ({
+      items: (raw.items || []).map((it) => ({
+        type: it.type || 'link',
+        label: it.label || '',
+        url: it.url || '',
+        position: it.position || 'left',
+        sidebarId: it.sidebarId || '',
+      })),
+    }));
+
+  const setNavbarItem = (i, patch) =>
+    setNavbar((s) => ({
+      ...s,
+      data: { ...s.data, items: s.data.items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)) },
+    }));
+
+  const moveNavbarItem = (i, dir) =>
+    setNavbar((s) => {
+      const items = [...s.data.items];
+      const j = i + dir;
+      if (j < 0 || j >= items.length) return s;
+      [items[i], items[j]] = [items[j], items[i]];
+      return { ...s, data: { ...s.data, items } };
+    });
+
+  const addNavbarItem = () =>
+    setNavbar((s) => ({
+      ...s,
+      data: { ...s.data, items: [...s.data.items, { type: 'link', label: '新链接', url: '/blog', position: 'left' }] },
+    }));
+
+  const removeNavbarItem = (i) =>
+    setNavbar((s) => ({ ...s, data: { ...s.data, items: s.data.items.filter((it, idx) => idx !== i) } }));
+
+  const saveNavbar = () => {
+    const fileData = {
+      items: navbar.data.items.map((it) =>
+        it.type === 'docSidebar'
+          ? { type: 'docSidebar', label: it.label, sidebarId: it.sidebarId, position: it.position }
+          : { type: 'link', label: it.label, url: it.url, position: it.position }
+      ),
+    };
+    return saveJsonFile(navbar, setNavbar, '内容管理页面更新导航栏设置', fileData);
+  };
+
+  // ---------- 操作手册 ----------
+
+  const openManual = async () => {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const d = await gh(pat || null, `/repos/${OWNER}/${REPO}/contents/src/data/manual.md?ref=${BRANCH}`);
+      setManual({ text: b64decodeUtf8(d.content) });
+      setView({ mode: 'manual' });
+    } catch (e) {
+      setStatus({ type: 'err', text: '读取手册失败:' + e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // ---------- 文件树 ----------
+
+  const fileRow = (f, depth) => {
+    const indent = { paddingLeft: (0.6 + depth * 1.0).toFixed(1) + 'rem' };
+    if (f.startsWith('blog/')) {
+      return (
+        <div key={f} className="admin-file-row" style={indent}>
+          <button className="admin-file-link" disabled={busy} onClick={() => openFile(f)}>
+            {metas[f] && metas[f].pinned && <span className="admin-badge">置顶</span>}
+            {showName(f, 'blog/')}
+          </button>
+          <span className="admin-file-date">{blogDate(f)}</span>
+          <button
+            className="button button--secondary admin-small-btn"
+            disabled={busy}
+            onClick={() => togglePinned(f)}>
+            {metas[f] && metas[f].pinned ? '取消置顶' : '置顶'}
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div key={f} className="admin-file-row" style={indent}>
+        <button className="admin-file-link" disabled={busy} onClick={() => openFile(f)}>
+          {metas[f] && metas[f].pos != null && <span className="admin-badge admin-badge--pos">#{metas[f].pos}</span>}
+          {showName(f, 'docs/')}
+        </button>
+        <button
+          className="button button--secondary admin-small-btn"
+          title="往上移一位"
+          disabled={busy}
+          onClick={() => changePosition(f, ((metas[f] && metas[f].pos) || 1) - 1)}>
+          ▲
+        </button>
+        <button
+          className="button button--secondary admin-small-btn"
+          title="往下移一位"
+          disabled={busy}
+          onClick={() => changePosition(f, ((metas[f] && metas[f].pos) || 0) + 1)}>
+          ▼
+        </button>
+      </div>
+    );
+  };
+
+  const treeRoot = (() => {
+    const root = {};
+    (files || []).forEach((p) => {
+      const parts = p.split('/');
+      let node = root;
+      parts.forEach((seg, i) => {
+        const isFile = i === parts.length - 1;
+        if (isFile) {
+          node[seg] = null;
+        } else {
+          node[seg] = node[seg] || {};
+          node = node[seg];
+        }
+      });
+    });
+    return root;
+  })();
+
+  const countFiles = (n) => Object.keys(n).reduce((acc, k) => acc + (n[k] === null ? 1 : countFiles(n[k])), 0);
+
+  const renderTree = (node, basePath, depth) => {
+    const entries = Object.keys(node).sort();
+    const dirs = entries.filter((k) => node[k] !== null);
+    const fileList = entries.filter((k) => node[k] === null).map((k) => (basePath ? basePath + '/' + k : k));
+    fileList.sort((a, b) => {
+      if (a.startsWith('blog/') && b.startsWith('blog/')) {
+        const pa = metas[a] && metas[a].pinned ? 0 : 1;
+        const pb = metas[b] && metas[b].pinned ? 0 : 1;
+        if (pa !== pb) return pa - pb;
+        return b.localeCompare(a);
+      }
+      const pa = metas[a] && metas[a].pos != null ? metas[a].pos : 9999;
+      const pb = metas[b] && metas[b].pos != null ? metas[b].pos : 9999;
+      if (pa !== pb) return pa - pb;
+      return a.localeCompare(b);
+    });
+    const dirLabel = (d) => ({ blog: '博客文章', docs: '文档页面' }[d] || d);
+    return (
+      <>
+        {dirs.map((d) => {
+          const full = basePath ? basePath + '/' + d : d;
+          const isCollapsed = !!collapsed[full];
+          return (
+            <div key={full}>
+              <button
+                className="admin-tree-toggle"
+                style={{ paddingLeft: (0.4 + depth * 0.9).toFixed(1) + 'rem' }}
+                onClick={() => setCollapsed((c) => ({ ...c, [full]: !c[full] }))}>
+                {isCollapsed ? '▶' : '▼'} 📁 {dirLabel(d)}({countFiles(node[d])})
+              </button>
+              {!isCollapsed && <div>{renderTree(node[d], full, depth + 1)}</div>}
+            </div>
+          );
+        })}
+        {fileList.map((f) => fileRow(f, depth))}
+      </>
+    );
+  };
+
   // ---------- Markdown 工具栏 ----------
 
   const insertMd = (prefix, suffix = '', placeholder = '') => {
@@ -1019,6 +1190,12 @@ export default function AdminPage() {
               <button className="button button--secondary" disabled={busy} onClick={openFooter}>
                 🔗 页脚设置
               </button>
+              <button className="button button--secondary" disabled={busy} onClick={openNavbar}>
+                🧭 导航栏设置
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={openManual}>
+                📖 操作手册
+              </button>
               <button className="button button--secondary" disabled={busy} onClick={openAppearance}>
                 🎨 外观设置
               </button>
@@ -1037,49 +1214,7 @@ export default function AdminPage() {
               <p>正在读取文件列表…</p>
             ) : (
               <>
-                <h2>博客文章({blogFiles.length})</h2>
-                <ul className="admin-file-list">
-                  {blogFiles.map((f) => (
-                    <li key={f} className="admin-file-row">
-                      <button className="admin-file-link" disabled={busy} onClick={() => openFile(f)}>
-                        {metas[f] && metas[f].pinned && <span className="admin-badge">置顶</span>}
-                        {showName(f, 'blog/')}
-                      </button>
-                      <span className="admin-file-date">{blogDate(f)}</span>
-                      <button
-                        className="button button--secondary admin-small-btn"
-                        disabled={busy}
-                        onClick={() => togglePinned(f)}>
-                        {metas[f] && metas[f].pinned ? '取消置顶' : '置顶'}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <h2>文档页面({docFiles.length})</h2>
-                <ul className="admin-file-list">
-                  {docFiles.map((f) => (
-                    <li key={f} className="admin-file-row">
-                      <button className="admin-file-link" disabled={busy} onClick={() => openFile(f)}>
-                        {metas[f] && metas[f].pos != null && <span className="admin-badge admin-badge--pos">#{metas[f].pos}</span>}
-                        {showName(f, 'docs/')}
-                      </button>
-                      <button
-                        className="button button--secondary admin-small-btn"
-                        title="往上移一位"
-                        disabled={busy}
-                        onClick={() => changePosition(f, ((metas[f] && metas[f].pos) || 1) - 1)}>
-                        ▲
-                      </button>
-                      <button
-                        className="button button--secondary admin-small-btn"
-                        title="往下移一位"
-                        disabled={busy}
-                        onClick={() => changePosition(f, ((metas[f] && metas[f].pos) || 0) + 1)}>
-                        ▼
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                <div className="admin-tree">{renderTree(treeRoot, '', 0)}</div>
                 {!pat && <p className="admin-note">登录后可以:置顶文章、调整文档排序、看到文章标题。</p>}
               </>
             )}
@@ -1451,6 +1586,88 @@ export default function AdminPage() {
                 返回列表
               </button>
             </div>
+          </div>
+        )}
+
+        {view.mode === 'navbar' && navbar && (
+          <div className="admin-new-view">
+            <h2>导航栏设置(顶部那排链接)</h2>
+            {navbar.data.items.map((item, i) => (
+              <div className="admin-link-row" key={i}>
+                <input
+                  className="admin-input admin-input--label"
+                  placeholder="显示文字"
+                  value={item.label}
+                  onChange={(e) => setNavbarItem(i, { label: e.target.value })}
+                />
+                {item.type === 'docSidebar' ? (
+                  <span className="admin-note" style={{ flex: 1 }}>
+                    (文档入口,固定指向文档页)
+                  </span>
+                ) : (
+                  <input
+                    className="admin-input"
+                    placeholder="地址(http 开头 = 外链)"
+                    value={item.url}
+                    onChange={(e) => setNavbarItem(i, { url: e.target.value })}
+                  />
+                )}
+                <select
+                  className="admin-input"
+                  style={{ flex: '0 0 96px', minWidth: '96px' }}
+                  value={item.position}
+                  onChange={(e) => setNavbarItem(i, { position: e.target.value })}>
+                  <option value="left">居左</option>
+                  <option value="right">居右</option>
+                </select>
+                <button
+                  className="button button--secondary admin-small-btn"
+                  title="上移"
+                  disabled={busy}
+                  onClick={() => moveNavbarItem(i, -1)}>
+                  ▲
+                </button>
+                <button
+                  className="button button--secondary admin-small-btn"
+                  title="下移"
+                  disabled={busy}
+                  onClick={() => moveNavbarItem(i, 1)}>
+                  ▼
+                </button>
+                <button className="button button--secondary admin-small-btn" disabled={busy} onClick={() => removeNavbarItem(i)}>
+                  删除
+                </button>
+              </div>
+            ))}
+            <div className="admin-list-actions">
+              <button className="button button--secondary admin-small-btn" onClick={addNavbarItem}>
+                + 添加链接
+              </button>
+            </div>
+            <div className="admin-list-actions">
+              <button className="button button--primary" disabled={busy} onClick={saveNavbar}>
+                {busy ? '保存中…' : '保存导航栏'}
+              </button>
+              <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
+                返回列表
+              </button>
+            </div>
+            <p className="admin-note">列表顺序 = 网站上的显示顺序;「居左/居右」控制显示在导航栏左侧还是右侧。保存后约 2 分钟生效。</p>
+          </div>
+        )}
+
+        {view.mode === 'manual' && manual && (
+          <div className="admin-new-view">
+            <div className="admin-edit-bar">
+              <h2 style={{ margin: 0 }}>操作手册</h2>
+              <div className="admin-list-actions">
+                <button className="button button--secondary" disabled={busy} onClick={() => setView({ mode: 'list' })}>
+                  返回列表
+                </button>
+              </div>
+            </div>
+            <div className="admin-preview markdown" dangerouslySetInnerHTML={{ __html: marked.parse(manual.text) }} />
+            <p className="admin-note">这份手册的文件在 src/data/manual.md,可以自己改它(改完这里也会更新)。</p>
           </div>
         )}
 

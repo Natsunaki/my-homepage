@@ -367,3 +367,27 @@ html[data-theme='dark'] .admin-badge--pos {
 .admin-footer-col .button {
   margin-top: 0.2rem;
 }
+
+/* 文件树 */
+
+.admin-tree-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.45rem 0.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  color: var(--ifm-font-color-base);
+}
+
+.admin-tree-toggle:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.admin-tree .admin-file-row {
+  border-bottom: none;
+}
